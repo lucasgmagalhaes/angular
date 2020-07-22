@@ -443,7 +443,7 @@ export class ComponentDecoratorHandler implements
 
     const data: ComponentResolutionData = {
       directives: EMPTY_ARRAY,
-      pipes: EMPTY_MAP,
+      pipes: {},
       wrapDirectivesAndPipesInClosure: false,
     };
 
@@ -537,7 +537,10 @@ export class ComponentDecoratorHandler implements
         // TODO(alxhub): switch TemplateDefinitionBuilder over to using R3TargetBinder directly.
         // FIXME: this might be problematic :-)
         data.directives = usedDirectives;
-        data.pipes = new Map(bound.getUsedPipes().map(name => [name, pipes.get(name)!]));
+        data.pipes = {};
+        for (const name of bound.getUsedPipes()) {
+          data.pipes[name] = pipes.get(name)!;
+        }
         data.wrapDirectivesAndPipesInClosure = wrapDirectivesAndPipesInClosure;
       } else {
         // Declaring the directiveDefs/pipeDefs arrays directly would require imports that would
