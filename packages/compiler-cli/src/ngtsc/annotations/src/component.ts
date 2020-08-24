@@ -315,7 +315,6 @@ export class ComponentDecoratorHandler implements
           template: {
             nodes: template.nodes,
             template: template.template,
-            type: template.sourceMapping.type,
             ngContentSelectors: template.ngContentSelectors,
           },
           encapsulation,
@@ -611,7 +610,8 @@ export class ComponentDecoratorHandler implements
       node: ClassDeclaration, analysis: Readonly<ComponentAnalysisData>,
       resolution: Readonly<ComponentResolutionData>, pool: ConstantPool): CompileResult[] {
     const meta: R3ComponentMetadata = {...analysis.meta, ...resolution};
-    const res = compileDeclareComponentFromMetadata(meta, pool, makeBindingParser());
+    const res =
+        compileDeclareComponentFromMetadata(meta, analysis.template, pool, makeBindingParser());
     const factoryRes = compileNgFactoryDefField(
         {...meta, injectFn: Identifiers.directiveInject, target: R3FactoryTarget.Component});
     if (analysis.metadataStmt !== null) {
@@ -818,6 +818,7 @@ export class ComponentDecoratorHandler implements
       interpolationConfig,
       range: templateRange,
       escapedString,
+      isInline: component.has('template'),
       enableI18nLegacyMessageIdFormat: this.enableI18nLegacyMessageIdFormat,
       i18nNormalizeLineEndingsInICUs,
     });
@@ -852,10 +853,12 @@ export class ComponentDecoratorHandler implements
 
     return {
       ...parsedTemplate,
+      interpolationConfig,
+      preserveWhitespaces,
       diagNodes,
       template,
       templateUrl,
-      isInline: component.has('template'),
+
       file: new ParseSourceFile(templateStr, templateUrl),
     };
   }
@@ -911,7 +914,6 @@ function sourceMapUrl(resourceUrl: string): string {
     return resourceUrl;
   }
 }
-
 
 /**
  * Information about the template which was extracted during parsing.
