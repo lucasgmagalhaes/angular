@@ -7,7 +7,7 @@
  */
 
 import {AssertNotNull, BinaryOperator, BinaryOperatorExpr, CastExpr, ClassStmt, CommaExpr, CommentStmt, ConditionalExpr, DeclareFunctionStmt, DeclareVarStmt, Expression, ExpressionStatement, ExpressionVisitor, ExternalExpr, FunctionExpr, IfStmt, InstantiateExpr, InvokeFunctionExpr, InvokeMethodExpr, JSDocCommentStmt, LiteralArrayExpr, LiteralExpr, LiteralMapExpr, NotExpr, ReadKeyExpr, ReadPropExpr, ReadVarExpr, ReturnStatement, Statement, StatementVisitor, StmtModifier, ThrowStmt, TryCatchStmt, TypeofExpr, WrappedNodeExpr, WriteKeyExpr, WritePropExpr, WriteVarExpr} from '../../../compiler';
-import {LocalizedString} from '../../../compiler/src/output/output_ast';
+import {LocalizedString, UnaryOperator, UnaryOperatorExpr} from '../../../compiler/src/output/output_ast';
 import {AstFactory, ObjectLiteralProperty, TemplateElement} from '../../src/ngtsc/translator';
 
 export class Context {
@@ -21,6 +21,11 @@ export class Context {
     return !this.isStatement ? new Context(true) : this;
   }
 }
+
+const UNARY_OPERATORS = new Map<UnaryOperator, string>([
+  [UnaryOperator.Minus, '-'],
+  [UnaryOperator.Plus, '+'],
+]);
 
 const BINARY_OPERATORS = new Map<BinaryOperator, string>([
   [BinaryOperator.And, '&&'],
@@ -307,6 +312,14 @@ class ExpressionTranslatorVisitor<TStatement, TExpression> implements Expression
 
   visitTypeofExpr(ast: TypeofExpr, context: Context): TExpression {
     return this.factory.createTypeOfExpression(ast.expr.visitExpression(this, context));
+  }
+
+  visitUnaryOperatorExpr(ast: UnaryOperatorExpr, context: Context): TExpression {
+    if (!UNARY_OPERATORS.has(ast.operator)) {
+      throw new Error(`Unknown unary operator: ${UnaryOperator[ast.operator]}`);
+    }
+    return this.factory.createUnaryExpression(
+        UNARY_OPERATORS.get(ast.operator)!, ast.expr.visitExpression(this, context));
   }
 
   private visitStatements(statements: Statement[], context: Context): TStatement[] {

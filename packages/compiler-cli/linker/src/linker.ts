@@ -92,7 +92,7 @@ export class FileLinker<TStatement, TExpression> {
       preserveWhitespaces: metaObj.getBoolean('preserveWhitespaces'),
       i18nNormalizeLineEndingsInICUs: this.options.i18nNormalizeLineEndingsInICUs,
     });
-    if (template.errors !== undefined) {
+    if (template.errors !== null) {
       const errors = template.errors.map(err => err.toString()).join(', ');
       this.fail(
           metaObj.getNode('template'), `Errors found in the template of ${typeName}: ${errors}`);

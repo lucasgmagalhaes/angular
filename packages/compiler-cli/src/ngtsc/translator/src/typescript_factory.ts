@@ -10,6 +10,7 @@ import * as ts from 'typescript';
 import {DefaultImportRecorder} from '../../imports';
 
 import {AstFactory, ObjectLiteralProperty, SourceMapRange, TemplateLiteral} from './api';
+import {createTemplateMiddle, createTemplateTail} from './util';
 
 const BINARY_OPERATORS = new Map<string, ts.BinaryOperator>([
   ['&&', ts.SyntaxKind.AmpersandAmpersandToken],
@@ -220,20 +221,4 @@ export class TypeScriptFactory implements AstFactory<ts.Statement, ts.Expression
     }
     return statement;
   }
-}
-
-// HACK: Use this in place of `ts.createTemplateMiddle()`.
-// Revert once https://github.com/microsoft/TypeScript/issues/35374 is fixed
-function createTemplateMiddle(cooked: string, raw: string): ts.TemplateMiddle {
-  const node: ts.TemplateLiteralLikeNode = ts.createTemplateHead(cooked, raw);
-  node.kind = ts.SyntaxKind.TemplateMiddle;
-  return node as ts.TemplateMiddle;
-}
-
-// HACK: Use this in place of `ts.createTemplateTail()`.
-// Revert once https://github.com/microsoft/TypeScript/issues/35374 is fixed
-function createTemplateTail(cooked: string, raw: string): ts.TemplateTail {
-  const node: ts.TemplateLiteralLikeNode = ts.createTemplateHead(cooked, raw);
-  node.kind = ts.SyntaxKind.TemplateTail;
-  return node as ts.TemplateTail;
 }
